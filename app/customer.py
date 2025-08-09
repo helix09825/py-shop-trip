@@ -1,7 +1,10 @@
 import math
-from typing import Any
-
+from typing import Any, TYPE_CHECKING
 from app.car import Car
+
+
+if TYPE_CHECKING:
+    from app.shop import Shop
 
 
 def format_price(price: float) -> str:
@@ -46,7 +49,7 @@ class Customer:
         )
 
     def calculate_trip_cost(
-        self, shops: list[dict[str, Any]], fuel_price: float
+        self, shops: list["Shop"], fuel_price: float
     ) -> list[tuple[str, float]]:
         """
         Calculates the total cost of a shopping trip to each given shop.
@@ -65,14 +68,14 @@ class Customer:
         trip_options: list[tuple[str, float]] = []
         for shop in shops:
             # Calculate Euclidean distance between customer and shop.
-            distance = math.sqrt(
-                (shop["location"][0] - self.location[0]) ** 2
-                + (shop["location"][1] - self.location[1]) ** 2
+            distance = math.hypot(
+                shop.location[0] - self.location[0],
+                shop.location[1] - self.location[1]
             )
 
             # Calculate the cost of all products in the cart for the shop.
             shopping_cost = sum(
-                quantity * shop["products"][product]
+                quantity * shop.products[product]
                 for product, quantity in self.product_cart.items()
             )
 
@@ -82,6 +85,6 @@ class Customer:
             )
 
             total_trip_cost = shopping_cost + fuel_cost
-            trip_options.append((shop["name"], total_trip_cost))
+            trip_options.append((shop.name, total_trip_cost))
 
         return trip_options

@@ -1,7 +1,28 @@
 import json
 from typing import Any, cast
-
 from app.customer import Customer
+
+
+class Shop:
+    """Represents a shop with its details."""
+
+    def __init__(
+        self,
+        name: str,
+        location: list[float],
+        products: dict[str, float],
+    ) -> None:
+        """
+        Initializes a Shop instance.
+
+        Args:
+            name: The shop's name.
+            location: The shop's coordinates [x, y].
+            products: A dictionary of products and their prices.
+        """
+        self.name = name
+        self.location = location
+        self.products = products
 
 
 class ShopManager:
@@ -18,7 +39,14 @@ class ShopManager:
             config: dict[str, Any] = json.load(f)
 
         self.fuel_price: float = config["FUEL_PRICE"]
-        self.shops: list[dict[str, Any]] = config["shops"]
+        self.shops: list[Shop] = [
+            Shop(
+                name=shop_data["name"],
+                location=shop_data["location"],
+                products=shop_data["products"],
+            )
+            for shop_data in config["shops"]
+        ]
         self.customers: list[Customer] = [
             Customer(
                 name=cust_data["name"],
