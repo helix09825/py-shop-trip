@@ -1,7 +1,7 @@
 import math
 from typing import Any, TYPE_CHECKING
-from app.car import Car
 
+from app.car import Car
 
 if TYPE_CHECKING:
     from app.shop import Shop
@@ -22,12 +22,12 @@ class Customer:
     """Represents a customer with their details and shopping logic."""
 
     def __init__(
-        self,
-        name: str,
-        location: list[float],
-        product_cart: dict[str, int],
-        money: float,
-        car_data: dict[str, Any],
+            self,
+            name: str,
+            location: list[float],
+            product_cart: dict[str, int],
+            money: float,
+            car_data: dict[str, Any],
     ) -> None:
         """
         Initializes a Customer instance.
@@ -49,8 +49,8 @@ class Customer:
         )
 
     def calculate_trip_cost(
-        self, shops: list["Shop"], fuel_price: float
-    ) -> list[tuple[str, float]]:
+            self, shops: list["Shop"], fuel_price: float
+    ) -> list[tuple[str, float, float]]:
         """
         Calculates the total cost of a shopping trip to each given shop.
 
@@ -62,11 +62,16 @@ class Customer:
             fuel_price: The price of one liter of fuel.
 
         Returns:
-            A list of tuples, where each tuple contains the shop's name
-            and the total calculated cost of the trip.
+            A list of tuples, where each tuple contains the shop's name,
+            the total calculated cost of the trip, and the shopping cost.
         """
-        trip_options: list[tuple[str, float]] = []
+        trip_options: list[tuple[str, float, float]] = []
         for shop in shops:
+            # Check if shop has all required products
+            if not all(product in shop.products
+                       for product in self.product_cart):
+                continue  # Skip this shop as it's not a valid option
+
             # Calculate Euclidean distance between customer and shop.
             distance = math.hypot(
                 shop.location[0] - self.location[0],
@@ -80,11 +85,10 @@ class Customer:
             )
 
             # Calculate fuel cost for a round trip (to the shop and back).
-            fuel_cost = (
-                (distance * 2) * (self.car.fuel_consumption / 100) * fuel_price
-            )
+            fuel_cost = ((distance * 2)
+                         * (self.car.fuel_consumption / 100) * fuel_price)
 
             total_trip_cost = shopping_cost + fuel_cost
-            trip_options.append((shop.name, total_trip_cost))
+            trip_options.append((shop.name, total_trip_cost, shopping_cost))
 
         return trip_options

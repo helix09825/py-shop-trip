@@ -1,40 +1,9 @@
-import datetime
 from typing import TYPE_CHECKING
 
-from app.customer import format_price
 from app.shop import ShopManager
 
 if TYPE_CHECKING:
-    from app.customer import Customer
     from app.shop import Shop
-
-
-def print_purchase_receipt(customer: "Customer", shop: "Shop") -> None:
-    """
-    Prints the purchase receipt for a customer's shopping trip.
-
-    Args:
-        customer: The customer making the purchase.
-        shop: The shop where the purchase is made.
-    """
-    time_format = "%d/%m/%Y %H:%M:%S"
-    print(f"Date: {datetime.datetime.now().strftime(time_format)}")
-    print(f"Thanks, {customer.name}, for your purchase!")
-    print("You have bought:")
-
-    price_in_shop = 0.0
-    for product, quantity in customer.product_cart.items():
-        unit_price = shop.products[product]
-        total_price = unit_price * quantity
-        price_in_shop += total_price
-        plural = "s" if quantity > 1 else ""
-        print(
-            f"{quantity} {product}{plural} for "
-            f"{format_price(total_price)} dollars"
-        )
-
-    print(f"Total cost is {format_price(price_in_shop)} dollars")
-    print("See you again!")
 
 
 def shop_trip() -> None:
@@ -56,7 +25,7 @@ def shop_trip() -> None:
             shop_manager.shops, fuel_price
         )
 
-        for shop_name, cost in trip_costs:
+        for shop_name, cost, _ in trip_costs:
             print(
                 f"{customer.name}'s trip to the "
                 f"{shop_name} costs {round(cost, 2)}"
@@ -69,7 +38,7 @@ def shop_trip() -> None:
             continue
 
         # Find the cheapest trip using min instead of sorting.
-        cheapest_shop_name, cheapest_cost = min(
+        cheapest_shop_name, cheapest_cost, shopping_cost = min(
             trip_costs, key=lambda item: item[1]
         )
 
@@ -91,7 +60,7 @@ def shop_trip() -> None:
         )
 
         # Print the purchase receipt.
-        print_purchase_receipt(customer, chosen_shop)
+        chosen_shop.print_purchase_receipt(customer, shopping_cost)
         print()
         print(f"{customer.name} rides home")
 
